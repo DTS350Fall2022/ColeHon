@@ -99,6 +99,6 @@ filter(diamonds, carat > 3)
 
 Exercise 3
 
-Pressing "Alt Shift K" brought up a menu woth keyboard short cuts.You can also get to this menu by clicking "Tools" followed by "keyboard shortcuts help"
+Pressing "Alt Shift K" brought up a menu woth keyboard short cuts.You can also get to this menu by clicking "Tools" followed by "keyboard shortcuts help".
 
 
