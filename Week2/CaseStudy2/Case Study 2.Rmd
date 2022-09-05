@@ -1,0 +1,49 @@
+---
+title: "Case Study 2"
+author: "Cole Hon"
+date: "9/5/2022"
+output:
+  html_document:
+    theme: cosmo
+    keep_md: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+
+urlfile="https://github.com/WJC-Data-Science/DTS350/raw/master/coral.csv"
+mydata <- read_csv(url(urlfile))
+
+tail(mydata)
+head(mydata)
+```
+ 
+
+ 
+```{r Replicating the Data}
+ggplot(mydata, aes(fill = Event, y= Value, x= Year)) + 
+  geom_bar(position="stack", stat="identity") +
+  facet_wrap( ~ Entity, nrow = 2, scales = "free")
+  
+```
+ 
+ As an overall trend, it can be said that coral bleaching is increasing although there are obvious spikes and dips throughout the years.
+ 
+ 
+```{r Creating my own data visulaization}
+ggplot(mydata, aes(fill = Event, y= Value, x= Year)) + 
+  geom_smooth(mapping = aes(y = Value, x = Year)) +
+  facet_wrap( ~ Entity, nrow = 2, scales = "free")
+```
+ 
+ This visualization gives an idea of how moderate and severe bleaching events differ from eachother throughout the years by said location
+ 
+ 
+ 
