@@ -1,0 +1,66 @@
+---
+title: "CaseStudy3"
+author: "Cole Hon"
+date: "9/12/2022"
+output: 
+  html_document:
+    theme: cosmo
+    keep_md: TRUE
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(gapminder)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(downloader)
+library(knitr)
+
+str(gapminder)
+```
+
+
+
+```{r Removing Kuwait}
+gminder <- gapminder %>%
+  filter(country != "Kuwait")
+view(gminder)
+```
+
+
+```{r Plot 1}
+plot1 <- ggplot(data = gminder) +
+  scale_y_continuous(trans = "sqrt") +
+  geom_point(mapping = aes(size = pop/100000, x = lifeExp, y = gdpPercap, color = continent)) +
+  facet_wrap(~ year, nrow = 1) +
+  scale_size_continuous(name = "Population (100k)") +
+  theme_bw() 
+plot1
+```
+
+
+
+```{r Weighted GDP}
+weighted_gdpPercap <-  gminder %>%
+  group_by(year, continent) %>%
+  summarise(gdpPercap_weighted = weighted.mean(gdpPercap),
+            Population=pop/10000)
+```
+
+
+
+
+```{r Plot 2}
+plot2 <- ggplot(data = gminder) +
+  geom_point(mapping = aes(x = year, y = gdpPercap, color = continent)) +
+  geom_line(mapping = aes(x = year, y = gdpPercap, color = continent, group = country )) +
+  geom_point(data=weighted_gdpPercap, mapping = aes(x = year, y = gdpPercap_weighted, size = Population)) +
+  geom_line(data=weighted_gdpPercap, mapping = aes(x = year, y = gdpPercap_weighted)) +
+  facet_wrap(~ continent, nrow = 1) +
+  xlab("Year") + ylab("GDP Per Capita") +
+  theme_bw() 
+plot2
+```
+
