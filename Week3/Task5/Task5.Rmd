@@ -1,0 +1,97 @@
+---
+title: "Task 5"
+author: "Cole Hon"
+date: "9/12/2022"
+output: 
+  html_document:
+  keep_md: True
+  code_folding: 'hide'
+    
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+library(downloader)
+library(ggplot2)
+library(knitr)
+
+```
+
+
+```{r}
+SoloData <- read_csv("solo-artist-followers.csv")
+SoloData
+str(SoloData)
+```
+Data Sucessfully imported. All data consists of characters. 
+
+
+```{r}
+BillBoardData <- read_csv("billboard-hits.csv")
+BillBoardData
+str(BillBoardData)
+head(BillBoardData)
+```
+Data successfully imported. Data types include characters & dates. 
+
+```{r}
+six100 <- BillBoardData %>%
+  group_by(name) %>%
+  filter(n() > 6, band != "")
+six100
+```
+Finding the bands who have been in top 100 at least 6 times
+
+
+```{r}
+sixtopbands <- BillBoardData %>%
+  group_by(band) %>%
+  filter(name %in% six100$band)
+head(sixtopbands)
+```
+
+
+
+```{r}
+plots <- ggplot(data = six100, aes(x=peak_date, y=peak_rank, color=name, group=name)) +
+  geom_point() +
+  geom_line() +
+  geom_point(data = sixtopbands, color = "black") +
+  geom_line(data = sixtopbands, color = "black", linetype = "dotted") +
+  facet_wrap(~ band, scales = "free") +
+  xlab("peak_rank") + ylab("peakrank") +
+  theme_bw()
+plots
+```
+Observavtions that can be made: 
+- Beyonce has consitently been in the top 100 for the longest period of time, with the most appearances out of everyone else
+
+
+```{r}
+KC2021Crime <- read_csv("KCPD_Crime_Data_2021.csv")
+KC2021Crime
+str(KC2021Crime)
+```
+
+https://data.kcmo.org/Crime/KCPD-Crime-Data-2021/w795-ffu6
+This data consists of Crimes reported by the KCPD in 2021. It read in correctly but jsut like any data set in the real workd, there are missing entries, resulting in "parsing issues" The data consists of time stmaps and characters.
+
+
+```{r}
+KCCovidDeath <- read_csv("COVID-19_Case___Death_Trends_by_Date.csv")
+KCCovidDeath
+str(KCCovidDeath)
+```
+
+https://data.kcmo.org/Health/COVID-19-Case-Death-Trends-by-Date/nfta-sjx6
+This data consists of Covid deaths in KC from march 2020 to september 2022. It includes dates, total cases, new cases, total deaths, new deaths. 
+
+```{r}
+BadBuildings <- read_csv("Dangerous_Buildings_List.csv")
+BadBuildings
+str(BadBuildings)
+```
+
+https://data.kcmo.org/Neighborhoods/Dangerous-Buildings-List/ax3m-jhxx
+This is a list of dangerous buildings in KC. A building is deemed dangerous if they do  not meet building code standards.What is in this dataset is the adress, case number, coordinates, and case status. 
