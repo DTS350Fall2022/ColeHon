@@ -1,0 +1,70 @@
+---
+title: "CaseStudy4"
+author: "Cole Hon"
+date: "9/20/2022"
+output:
+  html_document: 
+  keep_md: TRUE
+  code_folding: 'hide'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(knitr)
+library(downloader)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+library(forcats)
+```
+
+
+```{r}
+library(nycflights13)
+?flights
+head(flights)
+```
+
+
+2. Which origin airport is best to minimize my chances of a late arrival when I am using Delta Airlines?
+
+```{r Delta Airlines}
+delay <- flights %>%
+  filter(carrier == "DL", arr_delay > 0) %>%
+  group_by(origin) %>%
+  count()
+delay
+
+delay_plot <- ggplot(data=delay, mapping=aes(origin, n, fill=origin)) +
+  geom_bar(stat="identity", position="dodge")+
+  labs(y = "Amount of Delays",
+       x = "Flight Origin",
+       title = "Amount of Delayed Delta Flights at Airport of Origin") +
+  theme(legend.position = "none")
+delay_plot
+```
+From my findings, the best origin airport to fly from to avoid a late arrival when using Delta would be EWR. This is because EWR has the least amount of delayed origin flights, which can result in the least amount of late arrivals.
+
+
+
+3. Which destination airport is the worst airport for arrival time?
+
+```{r}
+d_delay <- flights %>%
+  group_by(dest) %>%
+  summarise(median_delaytime = mean(arr_delay, na.rm = TRUE)) %>%
+  filter(median_delaytime > 25)
+d_delay
+destplot <- ggplot(data=d_delay, mapping=aes(dest, median_delaytime, color=dest)) +
+  geom_point() +
+  labs(y = "Median Delay Time",
+       x = "Destination Airport",
+       title = " Top Median Delay Times for Destination Airports (> 25 minutes)") +
+  theme(legend.position = "none")
+destplot
+```
+
+The metric I decided to use when figuring the wprst airport for arrival time was the median delay time. I went with median delay time becuase I didn't want any outliers to skew the average delay time. I honed in on any delay over 25 minutes to be a non-desirable delay time. The results pulled in 4 airports with a median arrival delay time being more than 25 minuites, with CAE coming in with the highest median delay time at right under 45 minutes.
