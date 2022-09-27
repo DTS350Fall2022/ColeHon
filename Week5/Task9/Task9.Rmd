@@ -1,0 +1,79 @@
+---
+title: "Task9"
+author: "Cole Hon"
+date: "9/22/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(knitr)
+library(lubridate)
+```
+
+
+```{r}
+?ToothGrowth
+head(ToothGrowth)
+```
+
+
+```{r First Plot Tooth Growth}
+ggplot(data=ToothGrowth, mapping=aes(as.factor(dose), len, color=supp)) +
+  geom_point(stat="identity", position="dodge") +
+  labs(y = "Tooth Length",
+       x = "Dosage (mg)",
+       title = "Higher Dosage = Longer Tooth Length")
+
+```
+This graph shows that the higher the dosage is, the longer the tooth will be be. This state is consistent with both supplement types as well as they both show the same trend on the grpah. 
+
+
+
+```{r Tooth Growth Second Plot }
+ggplot(data=ToothGrowth, mapping=aes(supp, len,)) +
+  geom_boxplot() +
+  labs(y = "Tooth Length",
+       x = "Supplement type",
+       title = "Supplement Type on Tooth Growth") 
+```
+This graph shows a box plot for the two different supplement types. OJ seems to have more concise results in terms of tooth growth as the box plot is more compact whereas VC is more spread out. 
+
+
+
+
+```{r}
+?mtcars
+head(mtcars)
+```
+
+
+
+```{r Data 2; Plot 1}
+ggplot(data=mtcars, mapping=aes(as.factor(cyl), mpg, color=hp)) +
+  geom_point(stat="identity") +
+  labs(y = "MPG",
+       x = "Cylinders in an Enigine",
+       title = "MPG in Relation to Cylinders in an Enginge")
+
+```
+This graph shows the relation of cylinders and mpg, along with the correlating horse power. The visualization communicates that as cylinders increase, miles per gallon decreases, but horse power increases. 
+
+
+
+
+```{r Data 2; Plot 2}
+ggplot(data=mtcars, mapping=aes(mpg, wt)) +
+  geom_point(color = "Red") +
+  labs(y = "Weight (1000lbs Increments)",
+       x = "MPG",
+       title = "Is there a Correlation Between Weight and MPG? ")
+  
+```
+I wanted to see if the weight of a vehicle had an effect on the mpg. This visualizaiton shows a strong trend of as the wig
+ht of the vehicle decreases, the mpg increases. The trend tells me that there is a correlation between these two factorts.
+
