@@ -1,0 +1,60 @@
+---
+title: "Task11"
+author: "Cole Hon"
+date: "10/3/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(knitr)
+```
+
+```{r}
+f <- tempfile()
+download.file("https://raw.githubusercontent.com/fivethirtyeight/data/master/fandango/fandango_score_comparison.csv", "f")
+
+score <- read_csv("f")
+str(score)
+head(score)
+
+
+```
+
+
+```{r}
+ratings <- score %>%
+  select(FILM, Fandango_Ratingvalue, RT_norm_round, Metacritic_norm_round, IMDB_norm_round) %>%
+  pivot_longer(2:5, names_to = "Website", values_to = "Rating") %>%
+  select(FILM, Website, Rating)
+```
+
+
+```{r}
+t40 <- head(ratings, n = 40)
+```
+
+
+```{r}
+ggplot(data = t40, aes(x = Website, y = Rating, fill = Rating)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~ FILM, nrow = 2) +
+  theme_bw() +
+  theme(legend.position = 'none') +
+  labs(x = "Rating",
+       y = "Film")
+```
+
+I know the task said to make it show the first 20 rows, but i chose to do the first 40 beacuse I felt like comparing the ratings from the different sources of 10 movies is more accurate than just 5 movies. With that being said, by looking at the charts created, i'd say that Fandago & RT have the same ratings for movies while metacritic and IMBD generally will have the same ratings for movies.
+
+
+
+
+
+
