@@ -1,0 +1,93 @@
+---
+title: "Task14"
+author: "Cole Hon"
+date: "10/19/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r}
+library(tidyverse)
+library(stringi)
+library(stringr)
+library(downloader)
+library(readr)
+library(ggplot2)
+```
+
+
+```{r}
+bible <- tempfile()
+download.file("https://github.com/WJC-Data-Science/DTS350/raw/master/bible.csv",bible, mode="wb")
+
+bibledata <- read_csv(bible)
+head(bibledata)
+```
+
+
+
+
+```{r}
+oldtest <- bibledata %>%
+  filter(volume_long_title == "The Old Testament") %>%
+  select(scripture_text)
+head(oldtest)
+
+newtest <- bibledata %>%
+  filter(volume_long_title == "The New Testament") %>%
+  select(scripture_text)
+head(newtest)
+```
+
+
+### Question #1: Old & New verse Length Comparisons
+```{r}
+verselength <- function(df) {
+  vlength <- vector("integer", 0)
+  for(row in df) {
+    vlength <- append(vlength, str_length(row))
+  }
+  vlength
+}
+
+mean(verselength(oldtest))
+
+mean(verselength(newtest))
+
+
+```
+
+
+### Question #2: Lord usage comparison
+```{r}
+str_length(str_extract_all(oldtest, "(?i)lord"))
+
+str_length(str_extract_all(newtest, "(?i)lord"))
+```
+
+
+
+### Question 3
+```{r}
+
+vdata <- as.data.frame(verselength(newtest))
+head(vdata)
+
+
+ggplot(data = vdata) +
+  geom_histogram(aes(x = verselength(newtest), color="")) +
+  labs(
+    x = "Verse Length",
+    y = "Occurance of Verse Length",
+    title = 'New Testament Verse Lengths'
+  ) +
+  theme_bw()
+
+```
+
+I'd be lying if I asaid this task was a breeze. The most difficult part of this task came in question 1, when I needed to find the verse length. I had trouble figuring out how to do that, but afer trial and error, I found out how to get the verselength, then applied that to the new testament and the old testament, being able to fins the average versel legth of both. The old testmant had a verse legnth mean of 136.7845 and the new testament's mean verse length was 118.3265. The case insenistive part of the code is one i forgot and had to look up, but other than that there were no troubles in finding the word count of lord in the two testaments. There were 58300 occurances of the word lord in the old testamnet compared to rhe 5900 occurances in the new testament. Verse length was dominant around the 100 range when looking at the visualization. 
+
+
+
+
