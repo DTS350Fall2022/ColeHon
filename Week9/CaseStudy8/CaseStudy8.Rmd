@@ -1,0 +1,131 @@
+---
+title: "CaseStudy8"
+author: "Cole Hon"
+date: "10/27/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(knitr)
+library(tidyverse)
+library(downloader)
+library(lubridate)
+library(riem)
+```
+
+### Reading in the data
+```{r}
+sales <- tempfile()
+  download.file("https://github.com/WJC-Data-Science/DTS350/raw/master/sales.csv", sales,   mode = "wb")
+salesdata <- read_csv(sales)
+tail(salesdata)
+```
+
+
+### Assign a timezone
+```{r}
+sdtz <- with_tz(salesdata, tzone = "US/Mountain")
+tail(sdtz)
+```
+
+
+### Creating correct time aggregations for POS Data
+```{r}
+td <- sdtz %>%
+  mutate(hour = hour(Time)) %>%
+  mutate(day = wday(Time, label = TRUE, abbr = FALSE)) %>%
+  mutate(week = week(Time)) %>%
+  mutate(month = month(Time))
+
+tail(td)
+```
+
+
+### Operation hours
+```{r}
+ophours <- td %>%
+  group_by(Name, hour) %>%
+  select(Name, Amount, hour) %>%
+  filter(Name != "Missing")
+
+head(ophours)
+tail(ophours)
+```
+
+### Visualization for sales by hour
+```{r}
+plot1 <- ggplot(ophours, aes(x = hour, y = Amount, color = hour,  na.rm = TRUE)) +
+  geom_col() +
+  facet_wrap(~ Name, nrow = 2) +
+  labs(x = "Hours of the day",
+       y = "Amount in Sales ",
+       title = "Sales by Each Hour of the Day") 
+
+plot1
+```
+Based off the visualization, it is evident that the busiest hours of the day is from the 11pm to 2:30am range. Hot diggity does the most in sales compared to the other companies. 
+
+
+### Operation Days
+```{r}
+opday <- td %>%
+  group_by(Name, day) %>%
+  select(Name, Amount, day) %>%
+  filter(Name != "Missing")
+
+tail(opday)
+```
+
+
+
+### Visualization for sales by each day
+```{r}
+
+plot1 <- ggplot(opday, aes(x = day, y = Amount, color = day,  na.rm = TRUE)) +
+  geom_col() +
+  facet_wrap(~ Name, nrow = 2)+
+  scale_x_discrete(label=abbreviate)+
+  guides(x = guide_axis(angle = 90))+
+  labs(x = "Days of Week",
+       y = "Amount in Sales",
+       title = "Sales by Each Day of the Week") 
+  
+plot1
+```
+There is a visual trend across most of the companies where customer traffic seems to increase as the week goes on up until Friday. There is not much traffic on the weekends. 
+
+
+### Creating Summary of Revenue Sum
+```{r}
+final <- sdtz %>%
+  group_by(Name) %>%
+  summarise(across(Amount, sum)) %>%
+  filter(Name != "Missing")
+
+head(final)
+```
+
+
+### Plotting Revenue Sum for each company
+```{r}
+ggplot(final, aes(x = Name, y = Amount, fill = Name)) +
+  geom_col() +
+  scale_x_discrete(label=abbreviate)+
+  guides(x = guide_axis(angle = 90))+
+  labs(x = "Companies",
+       y = "Revenue Totals",
+       title = "Comparison between Compaines and their Total Revenues") +
+  theme_bw()
+```
+
+The viaulization that shows the total revenue for each company gives accuracte insight for which businesses do the best. HotDiggity takes the place as the best followed by Lebele and Tacontento. Looking at the data for customer traffic by calcultaing sales for hours of the day and days of the week supports the claim that these are the top three business as well.
+
+
