@@ -1,0 +1,92 @@
+---
+title: "Task17"
+author: "Cole Hon"
+date: "11/2/2022"
+output:
+  html_document:
+    keep_md: TRUE
+    code_folding: 'hide'
+---
+
+
+```{r}
+library(tidyquant)
+library(knitr)
+library(lubridate)
+library(tidyverse)
+library(timetk)
+library(dygraphs)
+```
+
+Stocks I chose:
+- Adidas (ADDYY)
+- Nike (NKE)
+- Under Armour (UAA)
+
+Stocks my friend chose:
+- Amazon (AMZN)
+- Apple (AAPL)
+- Microsoft (MSFT)
+
+
+### Pulling Price Performance Data
+```{r}
+(Microsoft <- tq_get("MSFT", get = "stock.prices"))
+(Apple <- tq_get("AAPL", get = "stock.prices"))
+(Amazon <- tq_get("AMZN", get = "stock.prices"))
+
+(Adidas <- tq_get("ADDYY", get = "stock.prices"))
+(Nike <- tq_get("NKE", get = "stock.prices"))
+(UnderArmour <- tq_get("UAA", get = "stock.prices"))
+```
+
+
+### Combining Data
+```{r}
+MyStock <- tq_get(c("AAPL", "AMZN", "MSFT"), get = "stock.prices", from = "2021-10-1", to = today())
+head(MyStock)
+tail(MyStock)
+
+FriendStock <- tq_get(c("ADDYY", "NKE", "UAA"), get = "stock.prices", from = "2021-10-1", to = today())
+head(FriendStock)
+tail(FriendStock)
+
+
+Both <- tq_get(c("AAPL", "AMZN", "MSFT", "ADDYY", "NKE", "UAA"), get = "stock.prices", from = "2021-10-1", to = today())
+head(Both)
+tail(Both)
+```
+
+
+#Comparing Stock Prices Visualization
+```{r}
+stockplot <- Both %>%
+  ggplot(aes(x = date, y = close, color = symbol)) +
+  geom_line() +
+  labs(title = "Friends Choosing Between Stocks", y = "close price", x = "") +
+  theme_tq()
+
+stockplot
+```
+
+
+### Comparing Stock percentages interavtive visualization
+```{r}
+adjusted <- Both %>%
+  select(symbol, date, adjusted) %>%
+  pivot_wider(names_from = symbol, values_from = adjusted) %>%
+  tk_xts(date_var = date)
+
+dygraph(adjusted, main = "Friends Comparing Stocks") %>%
+  dyRebase(percent = TRUE) %>%
+  dyShading(from = "2021-10-01", to = today()) %>%
+  dyRangeSelector()
+```
+
+The stocks I chose to go with were ones I felt were pretty popular, falling in the retail or technoloy sectors of types of stocks. I also use products of these companies on a daily basis, so I thought it'd be interesting to see how they've been doing on the market. The first visualization I made was a line graph plotting the prices of each stock over the selected time period. This visualization gives a good idea on how each stock has performed compared to each other, but it didn't exactly give specifics. To get the specific information I wanted, I created a dygrpah. This interactivce graph was much better for comparioson puproses as it gave the net gain/loss as a percentage for each stock overtime. The graph shows that Apple was the only company with a net gain, as all the others showed an overall decrease in stock value over the selected time frame. 
+
+
+
+
+
+
