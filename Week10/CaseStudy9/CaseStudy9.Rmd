@@ -1,0 +1,125 @@
+---
+title: "CaseStudy9"
+author: "Cole Hon"
+date: "11/3/2022"
+output:
+  html_document:
+    keep_md: true
+    cold_folding: 'hide'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(readr)
+library(knitr)
+library(tidyverse)
+library(downloader)
+library(tidyquant)
+library(timetk)
+library(dygraphs)
+```
+
+
+### Setting up tickers today
+```{r}
+tickers_today <- tq_get(c("CXW", "F", "GM", "JCP", "KR", "WDC", "NKE","T", "WDAY", "WFC", "WMT"), get = "stock.prices", from = today()-years(5), to = today())
+tail(tickers_today)
+
+
+adjusted <- tickers_today %>%
+  select(symbol, date, adjusted) %>%
+  pivot_wider(names_from = symbol, values_from = adjusted) %>%
+  tk_xts(date_var = date)
+
+tail(adjusted)
+```
+
+### Graph 1
+```{r}
+dygraph(adjusted, main = "Stock Percentage") %>%
+  dyRebase(percent = TRUE) %>%
+  dyShading(from = today()-years(5), to = today()) %>%
+  dyRangeSelector()
+```
+
+### Graph 2
+```{r}
+dygraph(adjusted, main = "Stock Price Comparison") %>%
+  dyHighlight(highlightCircleSize = 2, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE) %>% 
+  dyRangeSelector(dateWindow = c(today()-years(5), today()))
+
+```
+
+
+
+### GGPlot Volume
+```{r}
+volume <- tickers_today %>%
+  select(symbol, date, volume)
+
+tail(volume)
+
+
+volumeplot <- ggplot(data = volume, mapping = aes(x = date, y = volume, color = symbol)) +
+  geom_line() +
+  facet_wrap(~symbol)
+
+volumeplot
+```
+
+
+
+### Setting up Friends Tickers
+```{r}
+tickers_friend <- tq_get(c("QQQ", "MO", "KO", "ABB", "LH", "CINF"), get = "stock.prices", from = today()-years(5), to = today())
+tail(tickers_friend)
+
+
+adjusted2 <- tickers_friend %>%
+  select(symbol, date, adjusted) %>%
+  pivot_wider(names_from = symbol, values_from = adjusted) %>%
+  tk_xts(date_var = date)
+
+tail(adjusted2)
+```
+
+
+### Friends Graph 1
+```{r}
+dygraph(adjusted2, main = "Friend Stock Percentage") %>%
+  dyRebase(percent = TRUE) %>%
+  dyShading(from = today()-years(5), to = today()) %>%
+  dyRangeSelector()
+```
+
+### Friends Graph 2
+```{r}
+dygraph(adjusted2, main = "Friend Stock Price Comparison") %>%
+  dyHighlight(highlightCircleSize = 2, 
+              highlightSeriesBackgroundAlpha = 0.2,
+              hideOnMouseOut = FALSE) %>% 
+  dyRangeSelector(dateWindow = c(today()-years(5), today()))
+```
+
+### Friends VOlume
+```{r}
+volume2 <- tickers_friend %>%
+  select(symbol, date, volume)
+
+tail(volume2)
+
+
+volumeplot2 <- ggplot(data = volume, mapping = aes(x = date, y = volume, color = symbol)) +
+  geom_line() +
+  facet_wrap(~symbol)
+
+volumeplot2
+```
+
+
