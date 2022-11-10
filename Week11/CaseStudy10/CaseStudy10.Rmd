@@ -1,0 +1,184 @@
+---
+title: "CaseStudy10"
+author: "Cole Hon"
+date: "11/9/2022"
+output:
+  html_document:
+    keep_md: TRUE
+    code_folding: 'hide'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r}
+library(tidyverse)
+library(USAboundaries)
+library(USAboundariesData)
+library(ggsflabel)
+library(remotes)
+library(devtools)
+library(ggplot2)
+library(maps)
+library(knitr)
+library(downloader)
+library(lubridate)
+library(plotly)
+library(gridExtra)
+```
+
+```{r}
+permitdata <- tempfile()
+download("https://raw.githubusercontent.com/WJC-Data-Science/DTS350/master/permits.csv", permitdata, mode = "wb")
+
+permits <- read_csv(permitdata)
+head(permits)
+tail(permits)
+```
+
+
+### Setting up FIPS
+```{r}
+FIPSstart<-permits%>%
+  mutate(state=as.character(state), stateFIPS=str_pad(state, 2, pad="0")) %>%
+  mutate(county=as.character(county), countyFIPS=str_pad(county, 3, pad="0"))
+FIPSstart
+
+FIPS <- FIPSstart %>%
+  mutate(geoid=paste0(stateFIPS,countyFIPS))
+```
+
+
+### Combining Data
+```{r}
+counties <- us_counties()
+
+county_FIPS <- merge(FIPS,counties, by = "geoid") %>%
+  group_by(state_name, year) %>%
+  summarise(across(value, sum))
+```
+
+
+
+```{r}
+USA <- ggplot(data = county_FIPS, aes(x = year, y = value, color = state_name)) +
+  geom_line() +
+  geom_point() +
+  labs(title="USA", x = "Year", y = "Permit Amount") +
+  theme_bw() +
+  theme(legend.position = 'none') 
+USA
+```
+
+
+
+```{r}
+Missouri <- county_FIPS %>%
+  filter(state_name == 'Missouri') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Missouri (Mid-West)",x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+Missouri
+```
+
+
+
+```{r}
+Florida <- county_FIPS %>%
+  filter(state_name == 'Florida') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Florida (South East)",x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+Florida
+```
+
+
+
+```{r}
+California <- county_FIPS %>%
+  filter(state_name == 'California') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="California (West)",x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+California
+```
+
+
+
+```{r}
+Texas <- county_FIPS %>%
+  filter(state_name == 'Texas') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Texas (Southwest)", x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+Texas
+```
+
+
+
+```{r}
+Pennsylvania <- county_FIPS %>%
+  filter(state_name == 'Pennsylvania') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Pennsylvania (Mid-Atlantic)", x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+
+Pennsylvania
+```
+
+
+
+```{r}
+Maine <- county_FIPS %>%
+  filter(state_name == 'Maine') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Maine (North East)", x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+Maine
+```
+
+
+```{r}
+Washington <- county_FIPS %>%
+  filter(state_name == 'Washington') %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_point() +
+  geom_line() +
+  labs(title="Washington (North West)", x = 'Year', y = 'Permit Amount') +
+  theme_bw() +
+  theme(legend.position = 'none')
+Washington
+```
+
+
+```{r}
+grid.arrange(USA, Missouri, Florida, California, Washington, Maine, Pennsylvania, Texas, nrow = 3)
+```
+
+When communicating the housing market crash of 2008, I first wanted to start off by showing the amount of residential building permits through out the years for the whole country. To do this, I selected each county and divided them up by whichever state they resided in. This allowed me to plot each state on one graph labeled as the USA plot. It can be seen that there is an obvious drop off around the same time in permits for each state on that graph. In order to get a better understanding of how the crash looked in the USA, I decided to pull a state from each region of the country. Again, the trends were similar in each region, with the amount of permits dropping by around 50% (if not more) from 2008 to 2010 for each of the selected states representing said regions. 
+
+
+
+
