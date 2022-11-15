@@ -1,0 +1,139 @@
+---
+title: "CaseStudy 11"
+author: "Cole Hon"
+date: "11/15/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(readr)
+library(knitr)
+library(dplyr)
+library(forcats)
+library(downloader)
+library(tidyquant)
+library(dygraphs)
+library(scales)
+library(tidyverse)
+library(maps)
+library(ggsflabel)
+library(devtools)
+library(remotes)
+library(stringr)
+library(leaflet)
+library(mapview)
+```
+
+
+### Import Data
+```{r}
+permit_data <- tempfile()
+download("https://raw.githubusercontent.com/WJC-Data-Science/DTS350/master/permits.csv", permit_data, mode = "wb")
+PA_permits <- read_csv(permit_data)
+
+penn <- read.csv('latlong.csv')
+head(penn)
+
+```
+
+### Clean Data
+```{r}
+PApermits <- PA_permits %>%
+  filter(StateAbbr == "PA", year==2010)
+
+permits <- PApermits %>%
+  mutate(county = as.character(county))
+
+head(permits)
+
+pa <- penn %>%
+  mutate(county = as.character(County.Code.Number))
+
+```
+
+
+```{r}
+combined <- left_join(pa,permits, by='county') %>%
+  drop_na()
+head(combined)
+```
+
+```{r}
+data1 <- combined %>%
+  arrange(desc(value))
+```
+
+
+```{r}
+data1$quartile <- ntile(data1$value,4)
+data1$quartile
+```
+
+```{r}
+topcounty <- data1 %>%
+  filter(row_number() == 1)
+```
+
+
+```{r}
+ntile4 <- data1 %>%
+  filter(quartile == 4)
+ntile3 <- data1 %>%
+  filter(quartile == 3)
+ntile2 <- data1 %>%
+  filter(quartile == 2)
+ntile1 <- data1 %>%
+  filter(quartile == 1)
+```
+
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(data = ntile4,
+                   radius = 7,
+                   color = "blue",
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   popup = ~county,
+                   label = ~value) %>%
+    addCircleMarkers(data = ntile3,
+                   radius = 7,
+                   color = "red",
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   popup = ~county,
+                   label = ~value)%>%
+    addCircleMarkers(data = ntile2,
+                   radius = 7,
+                   color = "darkblue",
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   popup = ~county,
+                   label = ~value) %>%
+    addCircleMarkers(data = ntile1,
+                   radius = 7,
+                   color = "green",
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   popup = ~county,
+                   label = ~value) %>%
+    addCircleMarkers(data = topcounty,
+                   radius = 7,
+                   color = "royalblue1",
+                   stroke = FALSE,
+                   fillOpacity = 1,
+                   popup = ~county,
+                   label = ~value)
+```
+
+In this case study, I used the leaflet package to make an interactive map of pennsylvania. I selected the amount of building permits in each county, and then divided them up by using the ntile function into 4 separate groups based on the amount of permits each county holds. One group is the bottom 25th percentile, the 25-50th percentile, the 50-75th percentile, and the top 25th percintile. The percentiles the counties fall in are represented on the map by diffferent colors. I used a sepreate color for the top count, which is the one I suiggegested my friend moves to.
