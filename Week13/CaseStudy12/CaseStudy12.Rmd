@@ -1,0 +1,126 @@
+---
+title: "Case Study 12"
+author: "Cole Hon"
+date: "11/21/2022"
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(ggplot2)
+library(readr)
+library(knitr)
+library(dplyr)
+library(forcats)
+library(downloader)
+library(corrplot)
+library(tidyquant)
+library(timetk)
+library(dygraphs)
+library(scales)
+library(tidyverse)
+library(USAboundaries)
+library(maps)
+library(ggsflabel)
+library(devtools)
+library(remotes)
+library(stringr)
+library(leaflet)
+library(mapview)
+library(riem)
+library(stringi)
+library(stringr)
+library(gifski)
+library(gganimate)
+library(gridExtra)
+library(viridis)
+library(lubridate)
+```
+
+###Download Data
+```{r}
+avocado <- read.csv("avocado.csv")
+
+head(avocado)
+
+avocado$Date <- as.Date(avocado$Date)
+```
+
+###Filtering Data
+```{r}
+a_cities <- avocado %>%
+  filter(! region %in% c("California", "GreatLakes", "MidSouth", "Northeast", "NorthernNewEngland", "Plains", "SouthCentral", "Southeast", "TotalUS", "West", "WestTexNewMexico"))
+head(a_cities)
+
+a_state <- avocado %>%
+  filter(region %in% c("California"))
+head(a_state)
+         
+a_regions <- avocado %>%
+  filter(region %in% c("GreatLakes", "MidSouth", "Northeast", "NorthernNewEngland", "Plains", "SouthCentral", "Southeast", "West", "WestTexNewMexico"))
+head(a_regions)
+
+a_US <- avocado %>%
+  filter(region == "TotalUS")
+head(a_US)
+
+```
+
+
+###Creating Visualizations for U.S. overtime & Regions
+```{r}
+###
+us_plot <- ggplot(data = a_US, mapping = aes(x =Date, y =AveragePrice)) +
+  geom_line() + 
+  labs(title = "Average Avocado Prices from 2015 to 2018", subtitle = "Data Based off of the Total U.S.", x = "Date", y = "Average Price") 
+us_plot
+us_plot + transition_reveal(Date)
+
+
+p_region_plot <- ggplot(data = a_regions, mapping = aes(x = AveragePrice, y = Total.Volume, color = Total.Volume)) +
+  geom_point() + 
+  labs(title = "Average Avocado Prices from 2015 to 2018 in regards to volume", subtitle = " Data dased off of Regions", x = "Average Price", y = "Total Volume") + transition_time(Date)
+p_region_plot
+
+```
+Overtime, the prices of avocados fluctuate. The reason behind this could posisbly be simple supply and demand economics. As we see from the price and volume plot, the lower the volume, the higher the prices are. 
+
+
+```{r}
+pcity_plot <- ggplot(data = a_cities, mapping = aes(x = Date, y = AveragePrice, color = Total.Volume)) +
+  geom_line() +
+  facet_wrap(~region) +
+  labs(title = "Average Avocado Prices", subtitle = "Each US City", x = "Date", y = "Average Price")+
+  scale_color_viridis(discrete = FALSE) + scale_y_continuous(labels = comma) 
+pcity_plot 
+```
+ Overall, coastal cities seem to experience higher avocado prices. I would stay away from the coastal cities if you want to avoid high avocado prices.
+
+###Option 3: Analyze Stock Prices 
+```{r}
+a_stock <- tq_get(c("CVGW", "AVO"), get = "stock.prices", from = today()-years(2), to = today())
+head(a_stock)
+```
+
+```{r}
+stockplot <- a_stock %>%
+  ggplot(aes(x = date, y = close, color = symbol)) +
+  geom_line() +
+  labs(title = "Stock Prices of different Growers", y = "close price", x = "") +
+  theme_tq()
+stockplot
+```
+
+Stock Prices have between the two growers follow the same trends for the most part. There are a few places where AVO doesn't mirror CVF, but for the most part they are the same. Overall, the market for these growers are down this year by what looks to be a considerable amount. 
+
+
+
+
+
